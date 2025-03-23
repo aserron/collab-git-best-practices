@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# Get the current branch name
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Skip checks for main branch
+if [ "$CURRENT_BRANCH" = "main" ]; then
+    exit 0
+fi
+
+# Check if there are any uncommitted changes
+if ! git diff-index --quiet HEAD --; then
+    echo "Error: You have uncommitted changes. Please commit or stash them first."
+    exit 1
+fi
+
+# Check if branch is up to date with main
+git fetch origin main
+if ! git merge-base --is-ancestor origin/main HEAD; then
+    echo "Error: Your branch is not up to date with main. Please rebase or merge main first."
+    exit 1
+fi
+
+# Run tests if available
+if [ -f "package.json" ]; then
+    echo "Running tests..."
+    npm test || exit 1
+fi
+
+# Check for linting issues if available
+if [ -f "package.json" ]; then
+    echo "Running linter..."
+    npm run lint || exit 1
+fi
+
+# Check for type errors if using TypeScript
+if [ -f "tsconfig.json" ]; then
+    echo "Checking types..."
+    npm run type-check || exit 1
+fi
+
+# Check for security vulnerabilities
+if [ -f "package.json" ]; then
+    echo "Checking for security vulnerabilities..."
+    npm audit || true
+fi
+
+# Check for outdated dependencies
+if [ -f "package.json" ]; then
+    echo "Checking for outdated dependencies..."
+    npm outdated || true
+fi
+
+exit 0 

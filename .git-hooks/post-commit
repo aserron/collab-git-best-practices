@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# Get commit information
+COMMIT_MSG=$(git log -1 --pretty=%B)
+COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+COMMIT_EMAIL=$(git log -1 --pretty=%ae)
+COMMIT_HASH=$(git rev-parse HEAD)
+
+# Log commit information
+echo "Commit Information:"
+echo "Hash: $COMMIT_HASH"
+echo "Author: $COMMIT_AUTHOR <$COMMIT_EMAIL>"
+echo "Message: $COMMIT_MSG"
+
+# Check if commit message contains JIRA ticket reference
+if echo "$COMMIT_MSG" | grep -qE '[A-Z]+-[0-9]+'; then
+    echo "JIRA ticket reference found in commit message"
+fi
+
+# Check if commit is signed
+if git verify-commit HEAD 2>/dev/null; then
+    echo "Commit is signed"
+else
+    echo "Warning: Commit is not signed"
+fi
+
+# Check if commit is on a feature branch
+BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$BRANCH_NAME" == feature/* || "$BRANCH_NAME" == bugfix/* ]]; then
+    echo "Commit is on feature/bugfix branch: $BRANCH_NAME"
+fi
+
+# Check for large files
+LARGE_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | xargs -I {} git cat-file -s HEAD:{} | sort -rn | head -n 5)
+if [ ! -z "$LARGE_FILES" ]; then
+    echo "Warning: Large files detected in commit"
+    echo "$LARGE_FILES"
+fi
+
+# Check for binary files
+BINARY_FILES=$(git diff-tree --no-commit-id --name-only -r HEAD | xargs -I {} file {} | grep "binary file")
+if [ ! -z "$BINARY_FILES" ]; then
+    echo "Warning: Binary files detected in commit"
+    echo "$BINARY_FILES"
+fi
+
+# Check for potential merge conflicts
+if git diff-tree --no-commit-id --name-only -r HEAD | xargs -I {} git diff HEAD^ HEAD -- {} | grep -q "<<<<<<<"; then
+    echo "Warning: Potential merge conflict markers found"
+fi
+
+exit 0 
