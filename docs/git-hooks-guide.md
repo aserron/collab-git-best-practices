@@ -12,7 +12,52 @@ This guide provides detailed information about Git hooks, their configuration, a
 
 ## Introduction
 
-Git hooks are scripts that Git executes before or after events such as commit, push, and receive. They allow you to automate and enforce development workflows, ensuring code quality and consistency.
+Git hooks are scripts that Git executes before or after events such as commit, push, and receive. They are a built-in feature of Git that allows you to automate tasks and enforce policies in your Git workflow.
+
+## Branching Strategy
+
+Our repository follows a structured branching strategy to maintain code quality and streamline the development process:
+
+### Main Branches
+- `main`: Production-ready code, used for releases only
+- `dev`: Main development branch, integration point for features
+
+### Branch Types and Workflow
+1. **Feature Branches**
+   - Branch from: `dev`
+   - Naming: `feature/issue-number-description`
+   - Purpose: New features, enhancements
+   - Merge back to: `dev`
+
+2. **Bugfix Branches**
+   - Branch from: `dev`
+   - Naming: `bugfix/issue-number-description`
+   - Purpose: Bug fixes
+   - Merge back to: `dev`
+
+3. **Release Branches**
+   - Branch from: `dev`
+   - Naming: `release/vX.Y.Z`
+   - Purpose: Version preparation
+   - Merge to: `main` and `dev`
+
+### Branch Protection Rules
+- `main` branch:
+  - Requires pull request reviews
+  - No direct pushes
+  - Must be up to date before merging
+- `dev` branch:
+  - Requires pull request reviews
+  - No direct pushes
+  - Must pass CI checks
+
+### Workflow Example
+1. Create feature branch from `dev`
+2. Develop and commit changes
+3. Push to remote and create pull request to `dev`
+4. After review and CI checks, merge to `dev`
+5. When ready for release, create release branch from `dev`
+6. After testing, merge release branch to `main` and back to `dev`
 
 ### Hook Location
 Hooks are stored in the `.git-hooks` directory and are automatically installed when cloning the repository.
