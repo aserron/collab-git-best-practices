@@ -1,0 +1,69 @@
+#!/bin/sh
+
+# Get the commit message file path
+COMMIT_MSG_FILE=$1
+COMMIT_SOURCE=$2
+SHA1=$3
+
+# Read the commit message
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Check if the commit message follows the conventional commit format
+if ! echo "$COMMIT_MSG" | grep -qE '^(feat|fix|docs|style|refactor|test|chore): .+'; then
+    echo "Error: Commit message must follow the conventional commit format."
+    echo "Format: <type>: <subject>"
+    echo "Types: feat, fix, docs, style, refactor, test, chore"
+    exit 1
+fi
+
+# Check if the subject line is too long (50 chars)
+SUBJECT=$(echo "$COMMIT_MSG" | head -n 1)
+if [ ${#SUBJECT} -gt 50 ]; then
+    echo "Error: Commit subject line is too long (max 50 characters)"
+    exit 1
+fi
+
+# Check for trailing period in subject
+if echo "$SUBJECT" | grep -q '\.$'; then
+    echo "Error: Commit subject should not end with a period"
+    exit 1
+fi
+
+# Check for proper capitalization
+if ! echo "$SUBJECT" | grep -q '^[A-Z]'; then
+    echo "Error: Commit subject should start with a capital letter"
+    exit 1
+fi
+
+# Check for imperative mood in subject
+if echo "$SUBJECT" | grep -qE 'ed$|ing$|s$'; then
+    echo "Warning: Commit subject should use imperative mood (e.g., 'change' not 'changed')"
+fi
+
+# Check if body is present and properly formatted
+if [ $(echo "$COMMIT_MSG" | wc -l) -gt 1 ]; then
+    # Check if there's a blank line between subject and body
+    if ! echo "$COMMIT_MSG" | grep -q '^$'; then
+        echo "Warning: Consider adding a blank line between subject and body"
+    fi
+    
+    # Check if body lines are too long (72 chars)
+    BODY=$(echo "$COMMIT_MSG" | tail -n +2)
+    while IFS= read -r line; do
+        if [ ${#line} -gt 72 ]; then
+            echo "Warning: Body line exceeds 72 characters"
+        fi
+    done <<< "$BODY"
+fi
+
+# Check for common mistakes
+if echo "$COMMIT_MSG" | grep -q 'WIP'; then
+    echo "Warning: Commit message contains 'WIP'"
+fi
+
+if echo "$COMMIT_MSG" | grep -q 'TODO'; then
+    echo "Warning: Commit message contains 'TODO'"
+fi
+
+# Allow the commit to proceed
+exit 0 

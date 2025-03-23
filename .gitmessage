@@ -1,0 +1,41 @@
+# <type>: <subject>
+#
+# <body>
+#
+# <footer>
+#
+# Type can be:
+#   feat     (new feature)
+#   fix      (bug fix)
+#   docs     (documentation changes)
+#   style    (formatting, missing semi colons, etc; no code change)
+#   refactor (refactoring production code)
+#   test     (adding missing tests, refactoring tests; no production code change)
+#   chore    (updating grunt tasks etc; no production code change)
+#
+# Subject should be 50 chars or less
+# First letter of subject should be capitalized
+# Subject should not end with a period
+# Subject should use the imperative mood ("change" not "changed" nor "changes")
+#
+# Body should wrap at 72 characters
+# Body should explain the problem that this commit is solving
+#
+# Footer is optional
+# Footer can contain a reference to an issue
+# Footer can contain a breaking change notice
+#
+# Examples:
+#   feat: add user authentication
+#
+#   fix: resolve memory leak in worker process
+#
+#   docs: update README with new API endpoints
+#
+#   style: format code according to style guide
+#
+#   refactor: simplify user validation logic
+#
+#   test: add unit tests for payment processing
+#
+#   chore: update dependencies to latest versions 
